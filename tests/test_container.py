@@ -134,3 +134,17 @@ def test_circular_dependency():
 
     with pytest.raises(RuntimeError):
         c.resolve(X)
+
+# -------------------------
+# Ignore *args, **kwargs
+# -------------------------
+class Flexible:
+    def __init__(self, *args, **kwargs):
+        pass
+
+def test_ignore_varargs():
+    c = Container()
+
+    obj = c.resolve(Flexible)
+
+    assert isinstance(obj, Flexible)
