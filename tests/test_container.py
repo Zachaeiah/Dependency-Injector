@@ -119,16 +119,21 @@ def test_scope_override():
 
     child = c.create_scope()
 
-    class A2(A):
-        pass
-
+    class A2(A): pass
     child.register(A, A2)
 
-    parent_a = c.resolve(A)
-    child_a = child.resolve(A)
+    assert type(c.resolve(A)) is A
+    assert type(child.resolve(A)) is A2
 
-    assert type(parent_a) is A
-    assert type(child_a) is A2
+
+def test_scope_singleton_isolation():
+    c = Container()
+    c.register(A, A, singleton=True)
+
+    child = c.create_scope()
+
+    assert c.resolve(A) is child.resolve(A)  # inherited singleton
+
 
 # -------------------------
 # Auto-construction (no registration)
