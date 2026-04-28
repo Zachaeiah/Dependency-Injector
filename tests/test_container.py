@@ -72,4 +72,23 @@ def test_factory_provider():
 
     assert isinstance(a, A)
 
+# -------------------------
+# Scoped override
+# -------------------------
+def test_scope_override():
+    c = Container()
+    c.register(A, A)
+
+    child = c.create_scope()
+
+    class A2(A):
+        pass
+
+    child.register(A, A2)
+
+    parent_a = c.resolve(A)
+    child_a = child.resolve(A)
+
+    assert type(parent_a) is A
+    assert type(child_a) is A2
 
