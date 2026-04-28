@@ -205,3 +205,18 @@ def test_ignore_varargs():
     obj = c.resolve(Flexible)
 
     assert isinstance(obj, Flexible)
+
+# -------------------------
+# Default parameters should not break DI
+# -------------------------
+class WithDefaults:
+    def __init__(self, a: A = None):
+        self.a = a
+
+def test_default_param():
+    c = Container()
+    c.register(A, A)
+
+    obj = c.resolve(WithDefaults)
+
+    assert isinstance(obj.a, A)
