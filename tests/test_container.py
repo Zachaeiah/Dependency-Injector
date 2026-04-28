@@ -246,3 +246,17 @@ def test_multiple_named_providers():
 
     assert isinstance(c.resolve(A, "one"), A1)
     assert isinstance(c.resolve(A, "two"), A2)
+
+# -------------------------
+# Error propagation clarity
+# -------------------------
+class Bad:
+    def __init__(self, a: A):
+        raise ValueError("constructor failed")
+
+def test_constructor_error_propagation():
+    c = Container()
+    c.register(A, A)
+
+    with pytest.raises(ValueError):
+        c.resolve(Bad)
