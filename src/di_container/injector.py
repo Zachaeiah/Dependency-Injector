@@ -1,5 +1,5 @@
 import inspect
-from typing import Type, Any
+from typing import Type, Any, get_type_hints
 from .exceptions import DependencyNotFoundError
 from .types import Key
 
@@ -36,6 +36,8 @@ class Injector:
             Any: _description_
         """
         sig = inspect.signature(cls.__init__)
+        type_hints = get_type_hints(cls.__init__, globalns=vars(__import__(cls.__module__)))
+
         kwargs = {}
 
         for name, param in sig.parameters.items():
@@ -43,22 +45,23 @@ class Injector:
                 continue
 
             if param.kind in (
-                inspect.Parameter.VAR_POSITIONAL,   # *args
-                inspect.Parameter.VAR_KEYWORD       # **kwargs
+                inspect.Parameter.VAR_POSITIONAL,
+                inspect.Parameter.VAR_KEYWORD
             ):
                 continue
 
-            if param.annotation is inspect.Parameter.empty:
-                if param.default is not inspect.Parameter.empty:
-                    continue  # allow default-only params
-                raise TypeError(f"Missing type annotation for '{name}' in {cls}")
+            ann = type_hints.get(name, param.annotation)
 
+            if ann is inspect.Parameter.empty:
+                if param.default is not inspect.Parameter.empty:
+                    continue
+                raise TypeError(f"Missing type annotation for '{name}' in {cls}")
 
             if isinstance(param.default, Inject):
                 inject = param.default
                 dependency = self.container.resolve(inject.cls, inject.name)
             else:
-                dependency = self.container.resolve(param.annotation)
+                dependency = self.container.resolve(ann)
 
             kwargs[name] = dependency
 
