@@ -23,6 +23,21 @@ def test_simple_resolution():
     assert isinstance(b, B)
     assert isinstance(b.a, A)
 
+# -------------------------
+# Deep dependency graph
+# -------------------------
+class C:
+    def __init__(self, b: B):
+        self.b = b
+
+def test_deep_graph():
+    c = Container()
+    c.register(A, A)
+
+    c_obj = c.resolve(C)
+
+    assert isinstance(c_obj.b.a, A)
+
 
 # -------------------------
 # Singleton behavior
