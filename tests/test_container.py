@@ -24,3 +24,14 @@ def test_simple_resolution():
     assert isinstance(b.a, A)
 
 
+# -------------------------
+# Singleton behavior
+# -------------------------
+def test_singleton():
+    c = Container()
+    c.register(A, A, singleton=True)
+
+    a1 = c.resolve(A)
+    a2 = c.resolve(A)
+
+    assert a1 is a2
