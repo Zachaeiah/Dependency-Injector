@@ -92,3 +92,16 @@ def test_scope_override():
     assert type(parent_a) is A
     assert type(child_a) is A2
 
+# -------------------------
+# Auto-construction (no registration)
+# -------------------------
+def test_auto_construct():
+    c = Container()
+
+    class C:
+        pass
+
+    obj = c.resolve(C)
+
+    assert isinstance(obj, C)
+
