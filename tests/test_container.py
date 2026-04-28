@@ -46,10 +46,14 @@ def test_singleton():
     c = Container()
     c.register(A, A, singleton=True)
 
-    a1 = c.resolve(A)
-    a2 = c.resolve(A)
+    assert c.resolve(A) is c.resolve(A)
 
-    assert a1 is a2
+
+def test_transient_default():
+    c = Container()
+    c.register(A, A)
+
+    assert c.resolve(A) is not c.resolve(A)
 
 # -------------------------
 # Named dependency
