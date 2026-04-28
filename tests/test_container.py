@@ -1,5 +1,5 @@
 import pytest
-from src.di_container import Container, Inject
+from di_container import Container, Inject
 
 # -------------------------
 # Test classes
@@ -35,3 +35,41 @@ def test_singleton():
     a2 = c.resolve(A)
 
     assert a1 is a2
+
+# -------------------------
+# Named dependency
+# -------------------------
+class Logger:
+    pass
+
+class FileLogger(Logger):
+    pass
+
+class Service:
+    def __init__(self, logger: Logger = Inject(Logger, "file")):
+        self.logger = logger
+
+def test_named_injection():
+    c = Container()
+    c.register(Logger, Logger)
+    c.register(Logger, FileLogger, name="file")
+
+    s = c.resolve(Service)
+
+    assert isinstance(s.logger, FileLogger)
+
+# -------------------------
+# Factory provider
+# -------------------------
+def factory():
+    return A()
+
+def test_factory_provider():
+    c = Container()
+    c.register(A, factory)
+
+    a = c.resolve(A)
+
+    assert isinstance(a, A)
+
+
