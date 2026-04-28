@@ -117,3 +117,20 @@ def test_missing_dependency():
 
     with pytest.raises(TypeError):
         c.resolve(NeedsMissing)
+
+# -------------------------
+# Circular dependency
+# -------------------------
+class X:
+    def __init__(self, y: "Y"):
+        pass
+
+class Y:
+    def __init__(self, x: X):
+        pass
+
+def test_circular_dependency():
+    c = Container()
+
+    with pytest.raises(RuntimeError):
+        c.resolve(X)
