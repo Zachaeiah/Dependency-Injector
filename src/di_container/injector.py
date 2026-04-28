@@ -2,6 +2,25 @@ import inspect
 from typing import Type, Any, get_type_hints
 from .exceptions import DependencyNotFoundError
 from .types import Key
+import sys
+
+
+def _build_namespaces(cls):
+    module = sys.modules[cls.__module__]
+    globalns = vars(module)
+
+    # Walk stack to find function locals that contain the class
+    localns = {}
+
+    for frame_info in inspect.stack():
+        frame_locals = frame_info.frame.f_locals
+
+        # If this class exists in that frame, we found the defining scope
+        if cls.__name__ in frame_locals:
+            localns = frame_locals
+            break
+
+    return globalns, localns
 
 class Inject:
     def __init__(self, cls: Type, name: str | None = None):
@@ -36,7 +55,10 @@ class Injector:
             Any: _description_
         """
         sig = inspect.signature(cls.__init__)
-        type_hints = get_type_hints(cls.__init__, globalns=vars(__import__(cls.__module__)))
+
+        globalns, localns = _build_namespaces(cls)
+
+        type_hints = get_type_hints(cls.__init__, globalns=globalns, localns=localns)
 
         kwargs = {}
 

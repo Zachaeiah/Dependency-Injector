@@ -179,6 +179,20 @@ def test_circular_dependency():
         c.resolve(X)
 
 # -------------------------
+# Forward reference resolution
+# -------------------------
+def test_forward_reference():
+    c = Container()
+
+    class A: pass
+
+    class B:
+        def __init__(self, a: "A"):
+            self.a = a
+
+    assert isinstance(c.resolve(B).a, A)
+
+# -------------------------
 # Ignore *args, **kwargs
 # -------------------------
 class Flexible:
