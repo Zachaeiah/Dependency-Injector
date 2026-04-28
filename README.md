@@ -11,3 +11,7 @@ This implementation focuses on:
 Deterministic and explicit dependency resolution
 Strong alignment with type-based design
 Extensibility for multiple providers and abstractions
+
+Why
+
+As systems grow, managing dependencies manually leads to tight coupling, scattered initialization logic, and reduced flexibility. This framework centralizes and formalizes dependency management, allowing components to rely on abstractions instead of concrete implementations. The result is improved testability, easier refactoring, and the ability to scale or swap implementations without modifying core logic, making the overall system more maintainable and predictable.
