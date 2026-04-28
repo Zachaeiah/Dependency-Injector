@@ -231,3 +231,18 @@ def test_register_instance():
     c.register_instance(A, instance)
 
     assert c.resolve(A) is instance
+
+# -------------------------
+# Multiple named providers
+# -------------------------
+def test_multiple_named_providers():
+    c = Container()
+
+    class A1(A): pass
+    class A2(A): pass
+
+    c.register(A, A1, name="one")
+    c.register(A, A2, name="two")
+
+    assert isinstance(c.resolve(A, "one"), A1)
+    assert isinstance(c.resolve(A, "two"), A2)
