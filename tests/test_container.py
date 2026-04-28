@@ -92,9 +92,23 @@ def test_factory_provider():
     c = Container()
     c.register(A, factory)
 
-    a = c.resolve(A)
+    assert isinstance(c.resolve(A), A)
 
-    assert isinstance(a, A)
+
+def test_factory_singleton():
+    calls = []
+
+    def factory():
+        calls.append(1)
+        return A()
+
+    c = Container()
+    c.register(A, factory, singleton=True)
+
+    c.resolve(A)
+    c.resolve(A)
+
+    assert len(calls) == 1
 
 # -------------------------
 # Scoped override
