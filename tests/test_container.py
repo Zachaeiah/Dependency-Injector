@@ -220,3 +220,14 @@ def test_default_param():
     obj = c.resolve(WithDefaults)
 
     assert isinstance(obj.a, A)
+
+# -------------------------
+# Explicit instance registration
+# -------------------------
+def test_register_instance():
+    c = Container()
+    instance = A()
+
+    c.register_instance(A, instance)
+
+    assert c.resolve(A) is instance
