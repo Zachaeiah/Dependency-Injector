@@ -74,6 +74,9 @@ class Container:
 
         provider = self._scope.get_provider(key)
 
+        if provider is None and name is not None:
+            raise DependencyNotFoundError(cls, name)
+
         self._resolving.append(key)
         try:
             if provider:

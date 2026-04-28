@@ -1,5 +1,5 @@
 import pytest
-from di_container import Container, Inject
+from di_container import Container, Inject, DependencyNotFoundError
 
 # -------------------------
 # Test classes
@@ -58,11 +58,8 @@ def test_transient_default():
 # -------------------------
 # Named dependency
 # -------------------------
-class Logger:
-    pass
-
-class FileLogger(Logger):
-    pass
+class Logger: pass
+class FileLogger(Logger): pass
 
 class Service:
     def __init__(self, logger: Logger = Inject(Logger, "file")):
@@ -76,6 +73,14 @@ def test_named_injection():
     s = c.resolve(Service)
 
     assert isinstance(s.logger, FileLogger)
+
+
+def test_named_missing():
+    c = Container()
+    c.register(Logger, Logger)
+
+    with pytest.raises(DependencyNotFoundError):
+        c.resolve(Service)
 
 # -------------------------
 # Factory provider
