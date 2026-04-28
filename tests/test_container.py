@@ -105,3 +105,15 @@ def test_auto_construct():
 
     assert isinstance(obj, C)
 
+# -------------------------
+# Missing dependency
+# -------------------------
+class NeedsMissing:
+    def __init__(self, x):
+        pass
+
+def test_missing_dependency():
+    c = Container()
+
+    with pytest.raises(TypeError):
+        c.resolve(NeedsMissing)
