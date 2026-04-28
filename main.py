@@ -12,7 +12,6 @@ class IDatabase:
     def query(self, sql: str):
         raise NotImplementedError()
 
-
 # -------------------------
 # Implementations
 # -------------------------

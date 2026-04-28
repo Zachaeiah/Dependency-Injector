@@ -4,7 +4,8 @@ Dependency Injection Container Module
 Provides a lightweight container for dependency management.
 """
 
-from .container import Container, Inject
+from .container import Container
+from .injector import Inject
 from .exceptions import DependencyNotFoundError
 
 __all__ = [
