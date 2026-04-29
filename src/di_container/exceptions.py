@@ -8,13 +8,18 @@ class DependencyNotFoundError(KeyError):
         path: Optional[list[tuple[Type, Optional[str]]]] = None,
         available: Optional[list[tuple[Type, Optional[str]]]] = None,
     ):
-        """_summary_
+        """Exception raised when a requested dependency cannot be resolved.
+
+        Captures contextual information about what was requested, how resolution
+        was attempted, and what alternatives were available.
 
         Args:
-            cls (Type): _description_
-            name (Optional[str], optional): _description_. Defaults to None.
-            path (Optional[list[tuple[Type, Optional[str]]]], optional): _description_. Defaults to None.
-            available (Optional[list[tuple[Type, Optional[str]]]], optional): _description_. Defaults to None.
+            cls (Type): The type that failed to resolve.
+            name (Optional[str], optional): Optional qualifier used in the lookup.
+            path (Optional[list[tuple[Type, Optional[str]]]], optional):
+                Resolution chain leading to the failure, used for debugging.
+            available (Optional[list[tuple[Type, Optional[str]]]], optional):
+                List of registered providers at the time of failure.
         """
         self.cls = cls
         self.name = name
@@ -24,10 +29,13 @@ class DependencyNotFoundError(KeyError):
         super().__init__(self._build_message())
 
     def _build_message(self) -> str:
-        """_summary_
+        """Constructs a detailed error message describing the resolution failure.
+
+        Includes the missing dependency, optional name qualifier, resolution path,
+        and a list of available providers to aid debugging.
 
         Returns:
-            str: _description_
+            str: Formatted error message.
         """
         parts = [
             f"Dependency not found: {self.cls.__name__}"

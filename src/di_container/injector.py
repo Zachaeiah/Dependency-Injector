@@ -6,6 +6,17 @@ import sys
 
 
 def _build_namespaces(cls):
+    """Builds the global and local namespaces required for resolving type hints.
+
+    This is necessary to correctly evaluate forward references and locally defined
+    classes when using get_type_hints.
+
+    Args:
+        cls (Type): The class whose constructor annotations need resolution.
+
+    Returns:
+        tuple: (globalns, localns) used for type hint evaluation.
+    """
     module = sys.modules[cls.__module__]
     globalns = vars(module)
 
@@ -24,35 +35,44 @@ def _build_namespaces(cls):
 
 class Inject:
     def __init__(self, cls: Type, name: str | None = None):
-        """_summary_
+        """Marker used to explicitly define how a dependency should be resolved.
+
+        Allows overriding default type-based resolution by specifying both
+        the dependency type and an optional named binding.
 
         Args:
-            cls (Type): _description_
-            name (str | None, optional): _description_. Defaults to None.
+            cls (Type): The dependency type to resolve.
+            name (str | None, optional): Optional qualifier for named bindings.
         """
         self.cls = cls
         self.name = name
 
 class Injector:
     def __init__(self, container):
-        """_summary_
+        """Handles automatic construction of objects using dependency injection.
+
+        Uses constructor introspection and type hints to resolve dependencies
+        from the container.
 
         Args:
-            container (_type_): _description_
+            container: The container responsible for resolving dependencies.
         """
         self.container = container
 
     def construct(self, cls: Type) -> Any:
-        """_summary_
+        """Constructs an instance of a class by resolving its dependencies.
+
+        Inspects the constructor signature, resolves all required parameters
+        from the container, and injects them into the class.
 
         Args:
-            cls (Type): _description_
+            cls (Type): The class to instantiate.
 
         Raises:
-            TypeError: _description_
+            TypeError: If a required parameter is missing a type annotation.
 
         Returns:
-            Any: _description_
+            Any: A fully constructed instance of the class.
         """
         sig = inspect.signature(cls.__init__)
 

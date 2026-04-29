@@ -10,7 +10,10 @@ T = TypeVar("T")
 
 class Container:
     def __init__(self):
-        """_summary_
+        """Dependency injection container responsible for managing registrations,
+        object lifetimes, and resolution of dependencies.
+
+        Initializes the root scope, injector, and circular dependency tracking.
         """
         self._scope = Scope()
         self._injector = Injector(self)
@@ -26,24 +29,24 @@ class Container:
         singleton: bool = False,
         name: Optional[str] = None,
     ) -> None:
-        """_summary_
+        """Registers a dependency provider for a given type.
 
         Args:
-            cls (Type[T]): _description_
-            provider (Callable[..., T] | Type[T]): _description_
-            singleton (bool, optional): _description_. Defaults to False.
-            name (Optional[str], optional): _description_. Defaults to None.
+            cls (Type[T]): The abstraction or type being registered.
+            provider (Callable[..., T] | Type[T]): Factory function or class used to create the instance.
+            singleton (bool, optional): If True, the instance is created once and reused. Defaults to False.
+            name (Optional[str], optional): Optional qualifier to distinguish multiple bindings of the same type.
         """
         key: Key = (cls, name)
         self._scope.providers[key] = Provider(provider, singleton)
 
     def register_instance(self, cls: Type[T], instance: T, name=None) -> None:
-        """_summary_
+        """Registers a pre-created instance as a singleton.
 
         Args:
-            cls (Type[T]): _description_
-            instance (T): _description_
-            name (_type_, optional): _description_. Defaults to None.
+            cls (Type[T]): The abstraction or type being registered.
+            instance (T): The concrete instance to bind.
+            name (Optional[str], optional): Optional qualifier for named bindings.
         """
         key: Key = (cls, name)
         p = Provider(lambda: instance, True)
@@ -54,18 +57,21 @@ class Container:
     # Resolution
     # -------------------------
     def resolve(self, cls: Type[T], name: str | None = None) -> T:
-        """_summary_
+        """Resolves an instance of the requested type.
+
+        Attempts to retrieve a registered provider. If none exists,
+        falls back to automatic construction using dependency injection.
 
         Args:
-            cls (Type[T]): _description_
-            name (str | None, optional): _description_. Defaults to None.
+            cls (Type[T]): The type to resolve.
+            name (str | None, optional): Optional qualifier for named bindings.
 
         Raises:
-            RuntimeError: _description_
-            DependencyNotFoundError: _description_
+            RuntimeError: If a circular dependency is detected.
+            DependencyNotFoundError: If a named dependency is not registered.
 
         Returns:
-            T: _description_
+            T: The resolved instance.
         """
         key: Key = (cls, name)
 
@@ -97,23 +103,30 @@ class Container:
     # Scope
     # -------------------------
     def create_scope(self) -> 'Container':
-        """_summary_
+        """Creates a child container scope.
+
+        The child scope inherits providers from the parent but can override
+        or extend registrations independently.
 
         Returns:
-            Container: _description_
+            Container: A new scoped container instance.
         """
         child:Container = Container()
         child._scope = Scope(parent=self._scope)
         return child
     
     def validate(self, fail_fast: bool = True):
-        """_summary_
+        """Validates all registered dependencies by attempting resolution.
+
+        Useful for detecting missing dependencies or configuration issues
+        at startup rather than runtime.
 
         Args:
-            fail_fast (bool, optional): _description_. Defaults to True.
+            fail_fast (bool, optional): If True, raises immediately on first error.
+                                       If False, collects all errors. Defaults to True.
 
         Returns:
-            _type_: _description_
+            list: A list of (key, exception) tuples if fail_fast is False.
         """
         errors = []
 
