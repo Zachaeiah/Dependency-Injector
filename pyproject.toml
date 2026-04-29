@@ -1,0 +1,6 @@
+[project]
+name = "simple_di"
+version = "0.1.0"
+description = "Lightweight dependency injection container"
+authors = [{ name = "Zach" }]
+dependencies = []
