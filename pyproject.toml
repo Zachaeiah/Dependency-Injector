@@ -1,6 +1,12 @@
 [project]
-name = "simple_di"
+name = "di-container"
 version = "0.1.0"
 description = "Lightweight dependency injection container"
 authors = [{ name = "Zach" }]
 dependencies = []
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
