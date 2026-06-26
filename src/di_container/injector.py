@@ -62,8 +62,14 @@ class Injector:
     def construct(self, cls: Type) -> Any:
         """Constructs an instance of a class by resolving its dependencies.
 
-        Inspects the constructor signature, resolves all required parameters
-        from the container, and injects them into the class.
+        Inspects the constructor signature and resolves required constructor
+        parameters from the container.
+
+        Rules:
+            - Required annotated parameters are auto-injected.
+            - Parameters with normal default values are skipped.
+            - Parameters using Inject(...) are explicitly injected.
+            - *args and **kwargs are ignored.
 
         Args:
             cls (Type): The class to instantiate.
@@ -77,8 +83,11 @@ class Injector:
         sig = inspect.signature(cls.__init__)
 
         globalns, localns = _build_namespaces(cls)
-
-        type_hints = get_type_hints(cls.__init__, globalns=globalns, localns=localns)
+        type_hints = get_type_hints(
+            cls.__init__,
+            globalns=globalns,
+            localns=localns,
+        )
 
         kwargs = {}
 
@@ -88,23 +97,28 @@ class Injector:
 
             if param.kind in (
                 inspect.Parameter.VAR_POSITIONAL,
-                inspect.Parameter.VAR_KEYWORD
+                inspect.Parameter.VAR_KEYWORD,
             ):
                 continue
 
-            ann = type_hints.get(name, param.annotation)
-
-            if ann is inspect.Parameter.empty:
-                if param.default is not inspect.Parameter.empty:
-                    continue
-                raise TypeError(f"Missing type annotation for '{name}' in {cls}")
-
+            # def __init__(self, reader = Inject(IPDFReader)):
             if isinstance(param.default, Inject):
                 inject = param.default
                 dependency = self.container.resolve(inject.cls, inject.name)
-            else:
-                dependency = self.container.resolve(ann)
+                kwargs[name] = dependency
+                continue
+            
+            # def __init__(self, y_tolerance: float = 3.0):
+            if param.default is not inspect.Parameter.empty:
+                continue
 
+            # def __init__(self, reader: IPDFReader):
+            ann = type_hints.get(name, param.annotation)
+
+            if ann is inspect.Parameter.empty:
+                raise TypeError(f"Missing type annotation for '{name}' in {cls}")
+
+            dependency = self.container.resolve(ann)
             kwargs[name] = dependency
 
         return cls(**kwargs)
