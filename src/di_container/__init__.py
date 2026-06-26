@@ -27,7 +27,7 @@ __all__ = (
 # -------------------------
 # Metadata
 # -------------------------
-__version__ = "0.1.1"
+__version__ = "0.1.3"
 __author__ = "Zachariah"
 __license__ = "MIT"
 
